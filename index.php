@@ -7,8 +7,8 @@ if (isset ($_POST["auth-subm"])) {
     $authErr1 = false;
     if (isset ($_POST["auth-login"]) && isset ($_POST["auth-pass"])) {
         $login = $db->real_escape_string ($_POST["auth-login"]);
-        $pass = $db->real_escape_string ($_POST["auth-pass"]);
-        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass.$salt))."'") or die ($db->error);
+        $pass = $db->real_escape_string ($_POST["auth-pass"]).$salt;
+        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass))."'") or die ($db->error);
         if ($q->num_rows) {
             $user = $q->fetch_assoc ();
             $_SESSION["id"] = $user["id"];
@@ -40,7 +40,7 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Логин не должен быть короче 4-х символов!</div>';
     }
     if (isset ($_POST["reg-pass"]) && strlen ($_POST["reg-pass"]) > 3) {
-        $pass = $db->real_escape_string ($_POST["reg-pass"]);
+        $pass = $db->real_escape_string ($_POST["reg-pass"]).$salt;
     } else {
         $errors[] = '<div class="alert alert-danger">Пароль не может быть короче 4-х символов!</div>';
     }
@@ -67,7 +67,7 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Вы не указали дату</div>';
     }
     if (empty ($errors)) {
-        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass.$salt))."', '$date', '0')")) {
+        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass))."', '$date', '0')")) {
             $_SESSION["id"] = $db->insert_id;
             header ("Location: /");
         } else {
