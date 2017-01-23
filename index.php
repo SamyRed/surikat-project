@@ -1,7 +1,7 @@
 <?php
 session_start ();
 require ("./db.php");
-.$salt = "s9fowuknifuo4joi3430jf4iojo34u09";
+$salt = "s9fowuknifuo4joi3430jf4iojo34u09";
 if (isset ($_POST["auth-subm"])) {
     $authErr = false;
     $authErr1 = false;
