@@ -1,13 +1,14 @@
 <?php
 session_start ();
 require ("./db.php");
+define ("SALT", "s9fowuknifuo4joi3430jf4iojo34u09");
 if (isset ($_POST["auth-subm"])) {
     $authErr = false;
     $authErr1 = false;
     if (isset ($_POST["auth-login"]) && isset ($_POST["auth-pass"])) {
         $login = $db->real_escape_string ($_POST["auth-login"]);
         $pass = $db->real_escape_string ($_POST["auth-pass"]);
-        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass))."'") or die ($db->error);
+        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass.SALT))."'") or die ($db->error);
         if ($q->num_rows) {
             $user = $q->fetch_assoc ();
             $_SESSION["id"] = $user["id"];
@@ -52,8 +53,8 @@ if (isset ($_POST["reg-subm"])) {
     } else {
         $errors[] = '<div class="alert alert-danger">Вы не повторили пароль!</div>';
     }
-    if (isset ($_POST["reg-date"]) && strlen ($_POST["reg-date"]) > 5) {
-        $dateText = $db->real_escape_string ($_POST["reg-date"]);
+    if (isset ($_POST["reg-year"]) && isset ($_POST["reg-mounth"]) && isset ($_POST["reg-day"])) {
+        $dateText = $db->real_escape_string ($_POST["reg-year"]."-".$_POST["reg-mounth"]."-".$_POST["reg-day"]);
         $date = strtotime ($dateText);
         if ($date + 31556926 * 5 - time () > 0) {
             $errors[] = '<div class="alert alert-danger">Too young!!</div>';
@@ -66,7 +67,7 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Вы не указали дату</div>';
     }
     if (empty ($errors)) {
-        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass))."', '$date', '0')")) {
+        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass.SALT))."', '$date', '0')")) {
             $_SESSION["id"] = $db->insert_id;
             header ("Location: /");
         } else {
@@ -112,7 +113,37 @@ if (isset ($_SESSION["id"])) {
                 <label>Введите логин: <br><input type="text" placeholder="Login..." name="reg-login"></label><br>
                 <label>Введите пароль: <br><input type="password" placeholder="Password..." name="reg-pass"></label><br>
                 <label>Повторите пароль: <br><input type="password" placeholder="Password..." name="reg-repass"></label><br>
-                <label>Дата рождения: <br><input type="date" name="reg-date"></label><br>
+                <label>Дата рождения: <br></label><br>
+				<label>
+					<select name="reg-day">
+<?php
+	for ($i = 1; $i <= 31; $i++) {
+		echo '<option value="'.$i.'">'.$i.'</option>';
+	}
+?>
+					</select>
+					<select name="reg-mounth">
+						<option value="01">Январь</option>
+						<option value="02">Февраль</option>
+						<option value="03">Март</option>
+						<option value="04">Апрель</option>
+						<option value="05">Май</option>
+						<option value="06">Июнь</option>
+						<option value="07">Июль</option>
+						<option value="08">Август</option>
+						<option value="09">Сентябрь</option>
+						<option value="10">Октябрь</option>
+						<option value="11">Ноябрь</option>
+						<option value="12">Декабрь</option>
+					</select>
+					<select name="reg-year">
+<?php
+	for ($i = date ("Y"); $i >= 1800; $i--) {
+		echo '<option value="'.$i.'">'.$i.'</option>';
+	}
+?>
+					</select>
+				</label>
                 <br><input type="submit" name="reg-subm" value="Зарегистрироваться" class="button"><a href="/" class="button">Вернуться</a>
             </form>
         </div>
