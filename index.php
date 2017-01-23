@@ -2,13 +2,13 @@
 session_start ();
 require ("./db.php");
 if (isset ($_POST["auth-subm"])) {
-    $errors = [];
+	$errors = [];
     $authErr = false;
     $authErr1 = false;
     if (isset ($_POST["auth-login"]) && !empty ($_POST["auth-login"]) && isset ($_POST["auth-pass"]) && !empty ($_POST["auth-pass"])) {
         $login = $db->real_escape_string ($_POST["auth-login"]);
         $pass = $_POST["auth-pass"];
-        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'") or die ($db->error);
+        if ($q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'")) {
 		if ($q->num_rows) {
 			$user = $q->fetch_assoc ();
 			if (password_verify ($pass, $user["pass"])) {
@@ -19,6 +19,9 @@ if (isset ($_POST["auth-subm"])) {
 			}
 		} else {
 			$errors[] = '<div class="alert alert-danger">Логин, или пароль неправильный!</div>';
+		}
+		} else {
+			$errors[] = "<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору.</div>";
 		}
     } else {
         $errors[] = '<div class="alert alert-danger">Вы не ввели логин, или пароль!</div>';
@@ -79,6 +82,7 @@ if (isset ($_POST["reg-subm"])) {
     }
 }
 ?>
+<!DOCKTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
