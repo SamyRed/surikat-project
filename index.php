@@ -27,60 +27,50 @@ if (isset ($_POST["logout"])) {
     header ("Loaction: /");
 }
 if (isset ($_POST["reg-subm"])) {
-    $loginErr = false;
-    $loginEmpty = false;
-    $passEmpty = false;
-    $repassErr = false;
-    $repassEmpty = false;
-    $dateYong = false;
-    $dateOld = false;
-    $dateEmpty = false;
-    $registered = false;
-    $regErr = false;
+    $errors;
     
     if (isset ($_POST["reg-login"]) && strlen ($_POST["reg-login"]) > 3) {
         $login = $db->real_escape_string ($_POST["reg-login"]);
         $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'");
         if ($q->num_rows) {
-            $loginErr = true;
+            $errors[] = '<div class="alert alert-danger">Логин занят!</div>';
         }
     } else {
-        $loginEmpty = true;
+        $errors[] = '<div class="alert alert-danger">Логин не должен быть короче 4-х символов!</div>';
     }
     if (isset ($_POST["reg-pass"]) && strlen ($_POST["reg-pass"]) > 3) {
         $pass = $db->real_escape_string ($_POST["reg-pass"]);
     } else {
-        $passEmpty = true;
+        $errors[] = '<div class="alert alert-danger">Пароль не может быть короче 4-х символов!</div>';
     }
     if (isset ($_POST["reg-repass"]) && strlen ($_POST["reg-repass"]) > 0) {
         $repass = $db->real_escape_string ($_POST["reg-repass"]);
         if ($repass == $pass) {
         } else {
-            $repassErr = true;
+            $errors[] = '<div class="alert alert-danger">Пароли не совпадают!</div>';
         }
     } else {
-        $repassEmpty = true;
+        $errors[] = '<div class="alert alert-danger">Вы не повторили пароль!</div>';
     }
-    echo strlen ($_POST["reg-date"]);
     if (isset ($_POST["reg-date"]) && strlen ($_POST["reg-date"]) > 5) {
         $dateText = $db->real_escape_string ($_POST["reg-date"]);
         $date = strtotime ($dateText);
         if ($date + 31556926 * 5 - time () > 0) {
-            $dateYong = true;
+            $errors[] = '<div class="alert alert-danger">Too young!!</div>';
         } else {
             if (time () - $date >= 31556926 * 150) {
-                $dateOld = true;
+                $errors[] = '<div class="alert alert-danger">Too old!</div>';
             }
         }
     } else {
-        $dateEmpty = true;
+        $errors[] = '<div class="alert alert-danger">Вы не указали дату</div>';
     }
-    if (!$loginErr && !$loginEmpty && !$passEmpty && !$repassErr && !$repassEmpty && !$dateYong && !$dateOld && !$dateEmpty) {
+    if (empty ($errors)) {
         if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass))."', '$date', '0')")) {
             $_SESSION["id"] = $db->insert_id;
             header ("Location: /");
         } else {
-            $regErr = true;
+            $errors[] = '<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору</div>';
         }
     } 
 }
@@ -115,29 +105,9 @@ if (isset ($_SESSION["id"])) {
         <div class="register">
             <form action="" method="post">
 <?php
-    if (isset ($loginEmpty) && $loginEmpty == true) {
-        echo '<div class="alert alert-danger">Логин не должен быть короче 4-х символов!</div>';
-    } else if (isset ($loginErr) && $loginErr == true) {
-        echo '<div class="alert alert-danger">Логин занят!</div>';
-    }
-    if (isset ($passEmpty) && $passEmpty == true) {
-        echo '<div class="alert alert-danger">Пароль не может быть короче 4-х символов!</div>';
-    }
-    if (isset ($repassEmpty) && $repassEmpty == true) {
-        echo '<div class="alert alert-danger">Вы не повторили пароль!</div>';
-    } else if (isset ($repassErr) && $repassErr == true) {
-        echo '<div class="alert alert-danger">Пароли не совпадают!</div>';
-    }
-    if (isset ($dateEmpty) && $dateEmpty == true) {
-        echo '<div class="alert alert-danger">Вы не указали дату</div>';
-    } else if (isset ($dateYong) && $dateYong == true) {
-        echo '<div class="alert alert-danger">Вам нет 5-ти лет!</div>';
-    } else if (isset ($dateOld) && $dateOld == true) {
-        echo '<div class="alert alert-danger">Вам не может быть больше 150-ти лет!</div>';
-    }
-    if (isset ($regErr) && $regErr == true) {
-        echo '<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору</div>';
-    }
+    foreach ($errors as $error) {
+		echo $error;
+	}
 ?>
                 <label>Введите логин: <br><input type="text" placeholder="Login..." name="reg-login"></label><br>
                 <label>Введите пароль: <br><input type="password" placeholder="Password..." name="reg-pass"></label><br>
