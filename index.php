@@ -2,7 +2,7 @@
 session_start ();
 require ("./db.php");
 if (isset ($_POST["auth-subm"])) {
-	$errors;
+    $errors = [];
     $authErr = false;
     $authErr1 = false;
     if (isset ($_POST["auth-login"]) && !empty ($_POST["auth-login"]) && isset ($_POST["auth-pass"]) && !empty ($_POST["auth-pass"])) {
