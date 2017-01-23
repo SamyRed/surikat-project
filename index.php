@@ -1,23 +1,27 @@
 <?php
 session_start ();
 require ("./db.php");
-$salt = "s9fowuknifuo4joi3430jf4iojo34u09";
 if (isset ($_POST["auth-subm"])) {
+	$errors;
     $authErr = false;
     $authErr1 = false;
-    if (isset ($_POST["auth-login"]) && isset ($_POST["auth-pass"])) {
+    if (isset ($_POST["auth-login"]) && !empty ($_POST["auth-login"]) && isset ($_POST["auth-pass"]) && !empty ($_POST["auth-pass"])) {
         $login = $db->real_escape_string ($_POST["auth-login"]);
-        $pass = $db->real_escape_string ($_POST["auth-pass"]).$salt;
-        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass))."'") or die ($db->error);
-        if ($q->num_rows) {
-            $user = $q->fetch_assoc ();
-            $_SESSION["id"] = $user["id"];
-            header ("Location: /");
-        } else {
-            $authErr1 = true;
-        }
+        $pass = $db->real_escape_string ($_POST["auth-pass"]);
+        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'") or die ($db->error);
+		if ($q->num_rows) {
+			$user = $q->fetch_assoc ();
+			if (password_verify ($pass, $user["pass"])) {
+				$_SESSION["id"] = $user["id"];
+				header ("Location: /");
+			} else {
+				$errors[] = '<div class="alert alert-danger">Логин, или пароль неправильный!</div>';
+			}
+		} else {
+			$errors[] = '<div class="alert alert-danger">Логин, или пароль неправильный!</div>';
+		}
     } else {
-        $authErr = true;
+        $errors[] = '<div class="alert alert-danger">Вы не ввели логин, или пароль!</div>';
     }
 }
 if (isset ($_POST["add-value"])) {
@@ -28,8 +32,7 @@ if (isset ($_POST["logout"])) {
     header ("Loaction: /");
 }
 if (isset ($_POST["reg-subm"])) {
-    $errors;
-    
+	$errors;
     if (isset ($_POST["reg-login"]) && strlen ($_POST["reg-login"]) > 3) {
         $login = $db->real_escape_string ($_POST["reg-login"]);
         $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'");
@@ -40,12 +43,12 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Логин не должен быть короче 4-х символов!</div>';
     }
     if (isset ($_POST["reg-pass"]) && strlen ($_POST["reg-pass"]) > 3) {
-        $pass = $db->real_escape_string ($_POST["reg-pass"]).$salt;
+        $pass = $db->real_escape_string ($_POST["reg-pass"]);
     } else {
         $errors[] = '<div class="alert alert-danger">Пароль не может быть короче 4-х символов!</div>';
     }
     if (isset ($_POST["reg-repass"]) && strlen ($_POST["reg-repass"]) > 0) {
-        $repass = $db->real_escape_string ($_POST["reg-repass"]).$salt;
+        $repass = $db->real_escape_string ($_POST["reg-repass"]);
         if ($repass == $pass) {
         } else {
             $errors[] = '<div class="alert alert-danger">Пароли не совпадают!</div>';
@@ -67,7 +70,7 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Вы не указали дату</div>';
     }
     if (empty ($errors)) {
-        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass))."', '$date', '0')")) {
+        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".password_hash($pass, PASSWORD_DEFAULT)."', '$date', '0')")) {
             $_SESSION["id"] = $db->insert_id;
             header ("Location: /");
         } else {
@@ -75,7 +78,6 @@ if (isset ($_POST["reg-subm"])) {
         }
     } 
 }
-
 ?>
 <html>
     <head>
@@ -152,11 +154,9 @@ if (isset ($_SESSION["id"])) {
 ?>
         <div class="auth">
 <?php
-        if (isset ($authErr) && $authErr == true) {
-            echo '<div class="alert alert-danger">Вы не ввели логин, или пароль!</div>';
-        } else if (isset ($authErr1) && $authErr1 == true) {
-            echo '<div class="alert alert-danger">Логин, или пароль введён неверно!</div>';
-        }
+    foreach ($errors as $error) {
+		echo $error;
+	}
 ?>
             <form action="" method="post">
                 <label>Введите логин: <br><input type="text" placeholder="Login..." name="auth-login"></label><br>
