@@ -7,7 +7,7 @@ if (isset ($_POST["auth-subm"])) {
     $authErr1 = false;
     if (isset ($_POST["auth-login"]) && !empty ($_POST["auth-login"]) && isset ($_POST["auth-pass"]) && !empty ($_POST["auth-pass"])) {
         $login = $db->real_escape_string ($_POST["auth-login"]);
-        $pass = $db->real_escape_string ($_POST["auth-pass"]);
+        $pass = $_POST["auth-pass"];
         $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'") or die ($db->error);
 		if ($q->num_rows) {
 			$user = $q->fetch_assoc ();
@@ -76,7 +76,7 @@ if (isset ($_POST["reg-subm"])) {
         } else {
             $errors[] = '<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору</div>';
         }
-    } 
+    }
 }
 ?>
 <html>
@@ -87,6 +87,18 @@ if (isset ($_POST["reg-subm"])) {
     </head>
     <body>
         <header><b>СурикатПроджект!</b> Специально для <a href="https://php.ru/forum/threads/kak-bystro-osvoit-php.52331/#post-419213">php.ru</a> =)</header>
+		<table class="records">
+			<tr><td class="head" colspan="2">Таблица рекордов</td></tr>
+			<tr class="title"><td>Пользователь</td><td>Значение</td></tr>
+<?php
+	$q = $db->query ("SELECT login, value FROM `users` ORDER BY `value` DESC");
+	while ($user = $q->fetch_assoc())	{
+?>
+			<tr><td><?=$user["login"];?></td><td><?=$user["value"];?></td></tr>
+<?php
+	}
+?>
+		</table>
 <?php
 if (isset ($_SESSION["id"])) {
     $q = $db->query ("SELECT * FROM `users` WHERE `id` = '{$_SESSION["id"]}' LIMIT 1");
