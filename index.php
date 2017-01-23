@@ -1,14 +1,14 @@
 <?php
 session_start ();
 require ("./db.php");
-define ("SALT", "s9fowuknifuo4joi3430jf4iojo34u09");
+.$salt = "s9fowuknifuo4joi3430jf4iojo34u09";
 if (isset ($_POST["auth-subm"])) {
     $authErr = false;
     $authErr1 = false;
     if (isset ($_POST["auth-login"]) && isset ($_POST["auth-pass"])) {
         $login = $db->real_escape_string ($_POST["auth-login"]);
         $pass = $db->real_escape_string ($_POST["auth-pass"]);
-        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass.SALT))."'") or die ($db->error);
+        $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login' AND `pass` = '".md5(md5($pass.$salt))."'") or die ($db->error);
         if ($q->num_rows) {
             $user = $q->fetch_assoc ();
             $_SESSION["id"] = $user["id"];
@@ -67,7 +67,7 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Вы не указали дату</div>';
     }
     if (empty ($errors)) {
-        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass.SALT))."', '$date', '0')")) {
+        if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".md5(md5($pass.$salt))."', '$date', '0')")) {
             $_SESSION["id"] = $db->insert_id;
             header ("Location: /");
         } else {
