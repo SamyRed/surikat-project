@@ -45,7 +45,7 @@ if (isset ($_POST["reg-subm"])) {
         $errors[] = '<div class="alert alert-danger">Пароль не может быть короче 4-х символов!</div>';
     }
     if (isset ($_POST["reg-repass"]) && strlen ($_POST["reg-repass"]) > 0) {
-        $repass = $db->real_escape_string ($_POST["reg-repass"]);
+        $repass = $db->real_escape_string ($_POST["reg-repass"]).$salt;
         if ($repass == $pass) {
         } else {
             $errors[] = '<div class="alert alert-danger">Пароли не совпадают!</div>';
