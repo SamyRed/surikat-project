@@ -21,7 +21,7 @@ if (isset ($_POST["auth-subm"])) {
 			$errors[] = '<div class="alert alert-danger">Логин, или пароль неправильный!</div>';
 		}
 		} else {
-			$errors[] = "<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору.</div>";
+			$errors[] = '<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору.</div>';
 		}
     } else {
         $errors[] = '<div class="alert alert-danger">Вы не ввели логин, или пароль!</div>';
