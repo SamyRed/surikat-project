@@ -40,7 +40,7 @@ if (isset ($_POST["logout"])) {
 	header ("Location: /");
 }
 if (isset ($_POST["reg-subm"])) {
-	$errors;
+	$errors = [];
     if (isset ($_POST["reg-login"]) && strlen ($_POST["reg-login"]) > 3) {
         $login = $db->real_escape_string ($_POST["reg-login"]);
         $q = $db->query ("SELECT * FROM `users` WHERE `login` = '$login'");
