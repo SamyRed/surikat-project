@@ -26,13 +26,18 @@ if (isset ($_POST["auth-subm"])) {
     } else {
         $errors[] = '<div class="alert alert-danger">Вы не ввели логин, или пароль!</div>';
     }
+	if (!empty ($errors)) {
+		$_SESSION["errors"] = $errors;
+		header ("Location: /");
+	}
 }
 if (isset ($_POST["add-value"])) {
     $db->query ("UPDATE `users` SET `value` = `value` + 1 WHERE `id` = '{$_SESSION["id"]}'");
+	header ("Location: /");
 }
 if (isset ($_POST["logout"])) {
     unset ($_SESSION["id"]);
-    header ("Loaction: /");
+	header ("Location: /");
 }
 if (isset ($_POST["reg-subm"])) {
 	$errors;
@@ -79,7 +84,14 @@ if (isset ($_POST["reg-subm"])) {
         } else {
             $errors[] = '<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору</div>';
         }
-    }
+    } else {
+		$_SESSION["errors"] = $errors;
+		header ("Location: /?register");
+	}
+}
+if (isset ($_SESSION["errors"]) && !empty ($_SESSION["errors"])) {
+	$errors = $_SESSION["errors"];
+	//$_SESSION["errors"] = "";
 }
 ?>
 <!DOCKTYPE html>
