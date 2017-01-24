@@ -14,6 +14,7 @@ if (isset ($_POST["auth-subm"])) {
 			if (password_verify ($pass, $user["pass"])) {
 				$_SESSION["id"] = $user["id"];
 				header ("Location: /");
+				die ();
 			} else {
 				$errors[] = '<div class="alert alert-danger">Логин, или пароль неправильный!</div>';
 			}
@@ -29,15 +30,18 @@ if (isset ($_POST["auth-subm"])) {
 	if (!empty ($errors)) {
 		$_SESSION["errors"] = $errors;
 		header ("Location: /");
+		die ();
 	}
 }
 if (isset ($_POST["add-value"])) {
     $db->query ("UPDATE `users` SET `value` = `value` + 1 WHERE `id` = '{$_SESSION["id"]}'");
 	header ("Location: /");
+	die ();
 }
 if (isset ($_POST["logout"])) {
     unset ($_SESSION["id"]);
 	header ("Location: /");
+	die ();
 }
 if (isset ($_POST["reg-subm"])) {
 	$errors = [];
@@ -81,17 +85,19 @@ if (isset ($_POST["reg-subm"])) {
         if ($db->query ("INSERT INTO `users` VALUES (NULL, '$login', '".password_hash($pass, PASSWORD_DEFAULT)."', '$date', '0')")) {
             $_SESSION["id"] = $db->insert_id;
             header ("Location: /");
+			die ();
         } else {
             $errors[] = '<div class="alert alert-danger">Ошибка записи в БД! Обратитесь к администратору</div>';
         }
     } else {
 		$_SESSION["errors"] = $errors;
 		header ("Location: /?register");
+		die ();
 	}
 }
-if (isset ($_SESSION["errors"]) && !empty ($_SESSION["errors"])) {
+if (isset ($_SESSION["errors"])) {
 	$errors = $_SESSION["errors"];
-	//unset ($_SESSION["errors"]);
+	unset ($_SESSION["errors"]);
 }
 ?>
 <!DOCKTYPE html>
