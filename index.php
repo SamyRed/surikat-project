@@ -91,7 +91,7 @@ if (isset ($_POST["reg-subm"])) {
 }
 if (isset ($_SESSION["errors"]) && !empty ($_SESSION["errors"])) {
 	$errors = $_SESSION["errors"];
-	//$_SESSION["errors"] = "";
+	//unset ($_SESSION["errors"]);
 }
 ?>
 <!DOCKTYPE html>
